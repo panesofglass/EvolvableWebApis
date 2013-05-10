@@ -33,8 +33,8 @@ namespace EvolvableWebApis.Controllers
             string id = Guid.NewGuid().ToString();
 
             _helloMessages.Add(id, message.Message);
+            var response = Request.CreateResponse(HttpStatusCode.Created, message.Message);
             var link = Url.Link("DefaultApi", new { controller = "Hello", id = id });
-            var response = Request.CreateResponse(HttpStatusCode.Created);
             response.Headers.Location = new Uri(link);
             return response;
         }
@@ -44,18 +44,24 @@ namespace EvolvableWebApis.Controllers
             if (message == null)
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "You must supply a hello message."));
 
-            if (string.IsNullOrEmpty(id))
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "You must specify an id."));
-
             _helloMessages[id] = message.Message;
 
-            HttpResponseMessage response = _helloMessages.ContainsKey(id) ?
-                Request.CreateResponse(HttpStatusCode.Created) :
-                Request.CreateResponse();
+            var response = _helloMessages.ContainsKey(id) ?
+                Request.CreateResponse(HttpStatusCode.Created, message.Message) :
+                Request.CreateResponse(HttpStatusCode.NoContent);
 
             var link = Url.Link("DefaultApi", new { controller = "Hello", id = id });
             response.Headers.Location = new Uri(link);
             return response;
+        }
+
+        public HttpResponseMessage Delete(string id)
+        {
+            if (!_helloMessages.ContainsKey(id))
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Could not find a message with the specified id."));
+
+            _helloMessages.Remove(id);
+            return Request.CreateResponse(HttpStatusCode.NoContent);
         }
     }
 }
