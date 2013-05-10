@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using Newtonsoft.Json.Serialization;
 
 namespace EvolvableWebApis
 {
@@ -9,6 +10,9 @@ namespace EvolvableWebApis
     {
         public static void Register(HttpConfiguration config)
         {
+            // Use camel-cased JSON serialization.
+            config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
