@@ -38,5 +38,24 @@ namespace EvolvableWebApis.Controllers
             response.Headers.Location = new Uri(link);
             return response;
         }
+
+        public HttpResponseMessage Put(string id, Hello message)
+        {
+            if (message == null)
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "You must supply a hello message."));
+
+            if (string.IsNullOrEmpty(id))
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, "You must specify an id."));
+
+            _helloMessages[id] = message.Message;
+
+            HttpResponseMessage response = _helloMessages.ContainsKey(id) ?
+                Request.CreateResponse(HttpStatusCode.Created) :
+                Request.CreateResponse();
+
+            var link = Url.Link("DefaultApi", new { controller = "Hello", id = id });
+            response.Headers.Location = new Uri(link);
+            return response;
+        }
     }
 }
